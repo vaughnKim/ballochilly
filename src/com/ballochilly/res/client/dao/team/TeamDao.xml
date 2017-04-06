@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ballochilly.res.client.dao.team.TeamDao">
+
+	<update id="updateTeam" parameterType="Map" >
+	
+		UPDATE TEAM_CREATE
+		   SET TEAM_NAME = #{teamName}
+     		 , TEAM_LOCATION = #{teamLoc}
+     		 , TEAM_MEMBER_AGE = #{teamAge}
+     		 , TEAM_MEMBER_NUM = #{teamNum}
+     		 , TEAM_INFO = #{teamInfo}
+<!--      		 , TEAM_EMBLEM = #{teamEmblem} -->
+  		 WHERE TEAM_SEQ_NO = #{teamSeqNo}
+	
+	</update>
+	
+	<update id="updateEmblemTeam" parameterType="Map" >
+	
+		UPDATE TEAM_CREATE
+		   SET TEAM_EMBLEM = #{teamEmblem}
+  		 WHERE TEAM_SEQ_NO = #{teamSeqNo}
+	
+	</update>
+
+	<insert id="insertTeam" parameterType="Map">
+	
+		INSERT ALL INTO TEAM_CREATE
+			            (TEAM_SEQ_NO,
+			            TEAM_NAME,
+			            TEAM_MEMBER_NUM,
+			            TEAM_MEMBER_AGE,
+			            TEAM_INFO,
+			            TEAM_LOCATION,
+			            TEAM_EMBLEM,
+			            ID
+			            )
+			     VALUES ((SELECT NVL(MAX(TEAM_SEQ_NO), 0) + 1
+		   		   	    	FROM TEAM_CREATE),
+			            #{teamName},
+			            #{teamMemberNum},
+			            #{teamMemberAge},
+			            #{teamInfo},
+			            #{teamLocation},
+			            #{teamEmblem},
+			            #{id}
+			            )
+			       INTO MANAGEMENT
+           				(MG_SEQ_NO,
+			            ID,
+			            TEAM_SEQ_NO)
+			    VALUES ((SELECT NVL(MAX(MG_SEQ_NO), 0) + 1
+		   		   	    	FROM MANAGEMENT),
+			            #{id},
+			            (SELECT NVL(MAX(TEAM_SEQ_NO), 0) + 1
+		   		   	    	FROM TEAM_CREATE))
+			    SELECT MAX(TEAM_SEQ_NO)+1
+			      FROM TEAM_CREATE
+	            
+	</insert>
+	
+	<select id="isExistTeamName" parameterType="Map" resultType="Integer">
+	
+		SELECT COUNT(*)
+	  	  FROM TEAM_CREATE
+	 	 WHERE TEAM_NAME = #{teamName}
+		
+	
+	</select>
+	
+	<select id = "teamList" parameterType = "Map" resultType = "Map">
+	
+		SELECT T2.*
+		  FROM(SELECT ROWNUM RNUM, T1.*
+		         FROM(SELECT TEAM_SEQ_NO
+		                   , TEAM_NAME
+		                   , TEAM_MEMBER_NUM
+		                   , TEAM_MEMBER_AGE
+		                   , TEAM_INFO
+		                   , TEAM_LOCATION
+		                   , TEAM_EMBLEM
+		                   , ID
+		                FROM TEAM_CREATE
+		                 WHERE 1 = 1
+		                <if test='teamSeqNo != null'>
+		                	AND TEAM_SEQ_NO = #{teamSeqNo}
+		                </if>
+					    <if test="searchLoc != null and searchLoc != 'allLoc' ">
+					 	    AND TEAM_LOCATION = #{searchLoc}
+					    </if>
+					    <if test="searchAge != null and searchAge != 'allAge' ">
+					 	    AND TEAM_MEMBER_AGE = #{searchAge}
+					    </if>
+					    <if test="searchText != null">
+					        AND TEAM_NAME LIKE '%' || #{searchText} ||'%'
+			     	    </if>
+		               ORDER BY TEAM_SEQ_NO DESC) T1
+		 <![CDATA[
+		        WHERE ROWNUM <= #{page} * #{pageSize}) T2
+		  WHERE T2.RNUM >= #{page} * #{pageSize} - (#{pageSize} - 1)
+		 ]]>
+	
+	</select>
+	
+	<select id = "countTeam" resultType = "Integer" >
+		
+		SELECT COUNT(*)
+  		  FROM TEAM_CREATE
+	     WHERE 1 = 1
+		 <if test="searchLoc != null and searchLoc != 'allLoc' ">
+		   AND TEAM_LOCATION = #{searchLoc}
+		 </if>
+		 <if test="searchAge != null and searchAge != 'allAge' ">
+		   AND TEAM_MEMBER_AGE = #{searchAge}
+		 </if>
+		 <if test="searchText != null">
+		   AND TEAM_NAME LIKE '%' || #{searchText} ||'%'
+     	 </if>
+	
+	</select>
+	
+	<insert id="joinTeamMessage" parameterType="Map">
+	
+		INSERT INTO MESSAGE
+		            (MSG_SEQ_NO,
+		            CONTENT,
+		            SENDER,
+		            RECEIVER,
+		            MSG_YN,
+		            TEAM_SEQ_NO
+		            )
+		     VALUES ((SELECT NVL(MAX(MSG_SEQ_NO), 0) + 1
+		   		   	    FROM MESSAGE),
+		            #{content},
+	              	#{sender},
+	              	#{receiver},
+	              	'N',
+	              	#{teamSeqNo2}
+		            )
+	
+	</insert>
+	
+	<select id="selectTeam" parameterType="Map" resultType="Map">
+		
+		SELECT TEAM_SEQ_NO
+		     , TEAM_NAME
+		     , TEAM_MEMBER_NUM
+		     , TEAM_MEMBER_AGE
+		     , TEAM_INFO
+		     , TEAM_LOCATION
+		     , TEAM_EMBLEM
+		  FROM TEAM_CREATE
+		 WHERE ID = #{id}
+		   AND TEAM_SEQ_NO = #{teamSeqNo}
+	
+	</select>
+	
+	<insert id="insertTeamMember" parameterType="Map">
+	
+		INSERT INTO MANAGEMENT
+	            (MG_SEQ_NO,
+	          	 ID,
+	             TEAM_SEQ_NO
+	            )
+	     VALUES ((SELECT NVL(MAX(MG_SEQ_NO), 0) + 1
+		   		    FROM MANAGEMENT),
+	             #{receiver},
+	             #{teamSeqNo}
+	             )
+	
+	</insert>
+	
+	
+	<select id = "isExistTeamMember" parameterType="Map" resultType = "Integer" >
+	
+		SELECT COUNT(*)
+		  FROM MANAGEMENT
+		 WHERE ID = #{id}
+		   AND TEAM_SEQ_NO = #{teamSeqNo}
+			
+	</select>
+	
+	
+	<insert id="rejectMsg" parameterType="Map">
+	
+		INSERT INTO MESSAGE
+		            (MSG_SEQ_NO,
+		            CONTENT,
+		            SENDER,
+		            RECEIVER,
+		            MSG_YN
+		            )
+		     VALUES ((SELECT NVL(MAX(MSG_SEQ_NO), 0) + 1
+		   		    	FROM MESSAGE),
+		            #{content},
+	              	#{sender},
+	              	#{receiver},
+	              	'N'
+		            )
+	
+	</insert>
+	
+	
+	<update id="msgYnState" parameterType="Map">
+		
+		UPDATE MESSAGE
+		   SET MSG_YN = #{msgYn} || 'Y'
+		 WHERE MSG_SEQ_NO = #{msgSeqNo}
+	
+	</update>
+	
+	
+	<select id="alreadyJoinTeam" resultType = "Integer">
+	
+		SELECT COUNT(*)
+	 	  FROM MANAGEMENT
+		 WHERE ID = #{id}
+		   AND TEAM_SEQ_NO = #{teamSeqNo}
+	
+	</select>
+	
+	
+	<select id="countTeamMember" resultType="Integer">
+	
+		SELECT COUNT(*)
+		  FROM MANAGEMENT
+ 		 WHERE TEAM_SEQ_NO = #{teamSeqNo}
+	
+	</select>
+	
+	
+</mapper>
+
+
+
+
+
+
+
+

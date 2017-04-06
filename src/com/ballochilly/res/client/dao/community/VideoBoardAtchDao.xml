@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ballochilly.res.client.dao.community.VideoBoardAtchDao">
+
+
+	<insert id="AddBoardAtch" parameterType="Map">
+
+		INSERT INTO BOARD_ATCH 
+			   ( BOARD_ATCH_SEQ_NO, BV_SEQ_NO, BV_ATCH_VNAME )
+		VALUES 
+			   (
+				(SELECT NVL(MAX(BOARD_ATCH_SEQ_NO), 0) + 1
+				   FROM BOARD_ATCH)
+			  	, #{bvSeqNo}, #{bvAtchVname}
+			   )
+	</insert>
+	
+	<select id="selectAtchFile" parameterType="Map" resultType="Map">
+		SELECT BV_ATCH_VNAME
+		  FROM BOARD_ATCH
+		 WHERE BV_SEQ_NO = #{bvSeqNo} 
+	</select>
+	
+	<delete id="deleteVideoAtchBoard" parameterType="Map">
+			DELETE FROM BOARD_ATCH
+			 WHERE BV_SEQ_NO = #{bvSeqNo}
+	</delete>
+
+</mapper>
+
+
+
+
+
+
+
+

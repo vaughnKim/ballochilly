@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.ballochilly.res.client.dao.reservation.ReservationDao">
+	<select id="selectReservationStadium" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+ 	 	<![CDATA[
+		SELECT A.STADIUM_NAME, A.ADDRESS, A.COURT, A.SI_SEQ_NO
+  		  FROM STADIUM_INFO A
+    	 WHERE A.SI_SEQ_NO NOT IN 
+    	 	(SELECT B.SI_SEQ_NO
+               FROM  RESERVATION B
+              WHERE B.YEAR=#{year} 
+                AND B.MONTH=#{month} 
+                AND B.DAY=#{day} 
+                AND (	 (#{startTime} <= B.START_TIME AND B.START_TIME < #{endTime})
+    				  OR (#{startTime} < B.END_TIME AND B.END_TIME < #{endTime})
+   					  OR (B.START_TIME <= #{startTime} AND #{endTime} < B.END_TIME))
+             )
+      	 ORDER BY A.STADIUM_NAME, A.COURT
+    	]]>
+      	 	
+	</select>
+	
+	<insert id="insertReservationStadium" parameterType="java.util.HashMap">
+		INSERT INTO RESERVATION
+				(RV_SEQ_NO, YEAR, MONTH, DAY, START_TIME, END_TIME, COURT, ID, SI_SEQ_NO)
+		VALUES(
+			   (SELECT NVL(MAX(RV_SEQ_NO), 0) + 1
+			   	  FROM RESERVATION)
+			   	  , #{year}, #{month},#{day},#{startTime},#{endTime},#{court},#{id},#{siSeqNo})
+	</insert>
+	
+	<select id="selectReservationList" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT A.ID, A.COURT, A.START_TIME, A.END_TIME, C.STADIUM_NAME
+		  FROM RESERVATION A, STADIUM_INFO C
+		 WHERE A.SI_SEQ_NO = C.SI_SEQ_NO
+		   AND A.YEAR=#{year} AND A.MONTH=#{month} AND A.DAY=#{day}
+		   AND C.STADIUM_NAME=#{stadiumName} 
+	</select>
+	
+	<select id="selectSiSeqNo" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT SI_SEQ_NO
+	 	  FROM STADIUM_INFO
+		 WHERE COURT=#{court} AND STADIUM_NAME=#{stadiumName}
+	</select>
+	
+	<insert id="insertReservationFinal" parameterType="java.util.HashMap">
+		INSERT INTO RESERVATION
+				(RV_SEQ_NO, YEAR, MONTH, DAY, START_TIME, END_TIME, COURT, ID, SI_SEQ_NO)
+		VALUES(
+				(SELECT NVL(MAX(RV_SEQ_NO), 0)+1
+				   FROM RESERVATION), #{year}, #{month},#{day},#{startTime},#{endTime},#{court},#{id},(SELECT SI_SEQ_NO
+				   																						 FROM STADIUM_INFO
+				   																					    WHERE STADIUM_NAME=#{stadiumName} AND COURT=#{court})
+		)
+	</insert>
+	
+	<select id="selectMyReservation" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		<![CDATA[
+		 SELECT T2.*
+		   FROM(SELECT ROWNUM RNUM, T1.* 
+		          FROM (SELECT A.RV_SEQ_NO, A.YEAR, A.MONTH, A.DAY, A.START_TIME, A.END_TIME, A.COURT, A.ID, A.SI_SEQ_NO, B.STADIUM_NAME,
+		                      CASE WHEN TO_CHAR(SYSDATE, 'YYYYMMDD') <= A.YEAR || A.MONTH || A.DAY THEN 'Y'
+		                      ELSE 'N' END AS IS_CANCEL
+		                  FROM RESERVATION A
+		                      FULL OUTER JOIN STADIUM_INFO B
+		                      ON A.SI_SEQ_NO = B.SI_SEQ_NO
+		                 WHERE A.ID = #{id}
+		                 ORDER BY A.RV_SEQ_NO DESC) T1
+		          WHERE ROWNUM <= #{page} * #{pageSize} ) T2
+		   WHERE T2.RNUM >= #{page} * #{pageSize} - (#{pageSize} - 1)
+		 ]]>
+	</select>
+	
+	<select id="getTotalCount" parameterType="Map" resultType="Integer">
+		SELECT COUNT(*)
+		  FROM RESERVATION
+		 WHERE 1 = 1
+		 <if test="id != null">
+		 	AND ID = #{id}
+<!--    		    AND RV_SEQ_NO = #{rvSeqNo} -->
+   		 </if>
+	</select>
+	
+	<delete id="reservationDelete" parameterType="Map">
+		DELETE
+		  FROM RESERVATION
+		 WHERE RV_SEQ_NO = #{rvSeqNo}
+	</delete>
+	
+	<select id="mainReservation" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT *
+		  FROM (SELECT A.YEAR, A.MONTH, A.DAY, A.ID,B.STADIUM_NAME
+				  FROM RESERVATION A, STADIUM_INFO B
+				 WHERE A.SI_SEQ_NO = B.SI_SEQ_NO
+				   AND YEAR = #{year} AND MONTH=#{month} AND DAY=#{day}
+				 ORDER BY A.RV_SEQ_NO DESC)
+		 WHERE ROWNUM BETWEEN 1 AND 5
+		   
+	</select>
+	
+	<select id="SimplelocationReservation" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT STADIUM_NAME, ADDRESS
+		  FROM STADIUM_INFO
+		 WHERE 1=1
+		<if test="district != null">
+			AND ADDRESS LIKE '%' || #{district} || '%'
+		</if>
+		GROUP BY STADIUM_NAME, ADDRESS
+	</select>
+	
+	<select id="SimPlelocationCourt" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+		SELECT COURT, ADDRESS
+		  FROM STADIUM_INFO
+		 WHERE STADIUM_NAME = #{stadiumName}
+	</select>
+	
+	<select id="getEachCourtNo" parameterType="Map" resultType="Integer">
+		SELECT COUNT(*) AS CT
+  		  FROM STADIUM_INFO
+  		 <if test='stadiumName != null'>
+ 		 WHERE STADIUM_NAME = #{stadiumName}
+ 		 </if>
+ 	</select>
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

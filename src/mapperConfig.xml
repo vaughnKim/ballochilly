@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+	PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+
+	<settings>
+		<setting name="mapUnderscoreToCamelCase" value="true" />
+	</settings>
+
+	<typeAliases>
+		<typeAlias alias="String" type="java.lang.String" />
+		<typeAlias alias="Map" type="java.util.Map" />
+		<typeAlias alias="Integer" type="java.lang.Integer" />
+	</typeAliases>
+	
+	<mappers>
+	
+		<mapper resource="com/ballochilly/res/client/dao/reservation/ReservationDao.xml" />
+		
+		<mapper resource="com/ballochilly/res/client/dao/user/UserDao.xml" />
+		
+		<mapper resource="com/ballochilly/res/client/dao/stadium/StadiumDao.xml" />
+		<mapper resource="com/ballochilly/res/client/dao/stadium/StadiumGaleryDao.xml" />
+		<mapper resource="com/ballochilly/res/client/dao/stadium/StadiumBoardDao.xml" />
+		<mapper resource="com/ballochilly/res/client/dao/stadium/StadiumBoardAtchDao.xml" />
+		<mapper resource="com/ballochilly/res/client/dao/stadium/StadiumBoardReplyDao.xml" />
+		
+		<mapper resource="com/ballochilly/res/client/dao/team/TeamDao.xml" />
+		<mapper resource="com/ballochilly/res/client/dao/team/LookForTeamBoardDao.xml" />
+		<mapper resource="com/ballochilly/res/client/dao/team/LookForPlayerBoardDao.xml" />
+		
+		<mapper resource="com/ballochilly/res/client/dao/community/VideoBoardDao.xml" />
+		<mapper resource="com/ballochilly/res/client/dao/community/VideoBoardReplyDao.xml" />
+		<mapper resource="com/ballochilly/res/client/dao/community/VideoBoardAtchDao.xml" />
+		
+		<mapper resource="com/ballochilly/res/admin/dao/MasterDao.xml" />
+		
+		<mapper resource="com/ballochilly/res/client/dao/sub/SubDao.xml" />
+		
+	</mappers>
+
+</configuration>

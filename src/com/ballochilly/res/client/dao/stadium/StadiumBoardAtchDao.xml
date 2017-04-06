@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ballochilly.res.client.dao.stadium.StadiumBoardAtchDao">
+
+
+	<insert id="AddBoardAtch" parameterType="Map">
+
+		INSERT INTO BOARD_ATCH 
+			   ( BOARD_ATCH_SEQ_NO, BSR_SEQ_NO, BSR_ATCH_FNAME )
+		VALUES 
+			   (
+				(SELECT NVL(MAX(BOARD_ATCH_SEQ_NO), 0) + 1
+				   FROM BOARD_ATCH)
+			  	, #{bsrSeqNo}, #{bsrAtchFname}
+			   )
+	</insert>
+	
+	<select id="selectAtchFile" parameterType="Map" resultType="Map">
+		SELECT BSR_ATCH_FNAME
+		  FROM BOARD_ATCH
+		 WHERE BSR_SEQ_NO = #{bsrSeqNo} 
+	</select>
+	
+	<delete id="deleteStadiumAtchBoard" parameterType="Map">
+			DELETE FROM BOARD_ATCH
+			 WHERE BSR_SEQ_NO = #{bsrSeqNo}
+	</delete>
+
+</mapper>
+
+
+
+
+
+
+
+

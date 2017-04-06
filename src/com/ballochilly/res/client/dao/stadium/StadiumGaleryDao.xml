@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ballochilly.res.client.dao.stadium.StadiumGaleryDao">
+	
+<!-- 	추가 -->
+	<insert id="AddStadiumGalery" 
+		parameterType="Map">
+		
+		INSERT INTO STADIUM_GALERY
+			 		( SG_SEQ_NO, SI_SEQ_NO, PHOTO )
+			   VALUES
+					( (SELECT NVL(MAX(SG_SEQ_NO), 0) + 1
+		       		   FROM STADIUM_GALERY),
+		       		   #{siSeqNo} 
+		       		   <if test='file4 != null'>
+			       		   , #{file4} 
+		       		   </if>
+		       		)
+	</insert>
+	
+<!-- 	각 사진 가져오기 -->
+	<select id="selectEachStadiumGalery" 
+		parameterType="Map"
+		resultType="Map">
+		
+		SELECT A.PHOTO
+		  FROM STADIUM_GALERY A
+		  LEFT JOIN STADIUM_INFO B
+		    ON A.SI_SEQ_NO = B.SI_SEQ_NO
+		 WHERE B.STADIUM_NAME = #{stadiumName}
+		 GROUP BY A.PHOTO
+	</select>
+	
+	<delete id="deleteEachStadiumGalery" parameterType="Map">
+		DELETE FROM STADIUM_GALERY
+		 WHERE SI_SEQ_NO = #{siSeqNo}
+	</delete>
+	
+	
+</mapper>
+
+
+
+
+
+
+
+

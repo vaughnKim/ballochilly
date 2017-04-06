@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ballochilly.res.client.dao.user.UserDao">
+
+	<select id="selectPw" parameterType="Map" resultType = "java.lang.String">
+	
+		SELECT PW
+		  FROM MEMBER_INFO
+         WHERE 1 = 1
+		 <if test="id != null">
+		   AND ID = #{id}
+		 </if>
+         
+	</select>
+
+
+	<select id="selectUser" parameterType="Map" resultType="Map">
+		
+		SELECT *
+		  FROM MEMBER_INFO
+		 WHERE 1 = 1
+		 <if test="id != null">
+		   AND ID = #{id}
+		 </if>
+	
+	</select>
+
+	<insert id="insertUser" parameterType="Map">
+	
+		INSERT INTO MEMBER_INFO
+					(ID 
+		           , PW
+		           , NAME
+		           , AGE
+		           , EMAIL
+		           , PHONE
+		           , LOCATION
+		           , POSITION)
+		     VALUES (#{id}
+		           , #{pw}
+		           , #{name}
+		           , #{age}
+		           , #{email}
+		           , #{phone}
+		           , #{location}
+		           , #{position}
+		           )
+	
+	</insert>
+	
+	<select id = "isExistId" parameterType="Map" resultType = "Integer" >
+	
+		SELECT COUNT(*)
+		  FROM MEMBER_INFO
+		 WHERE ID = #{id}
+			
+	</select>
+	
+	<select id="searchId" parameterType="Map" resultType="Map">
+	
+		SELECT ID
+		  FROM MEMBER_INFO
+		 WHERE NAME = #{name}
+		   AND PHONE = #{phone}
+	
+	</select>
+	
+	<select id="searchEmail" parameterType="Map" resultType="Map">
+	
+		SELECT EMAIL
+		  FROM MEMBER_INFO
+		 WHERE NAME = #{name}
+		   AND PHONE = #{phone}
+		   AND ID = #{id}
+		   
+	</select>
+	
+	<update id="tempPassword" parameterType="Map">
+	
+		UPDATE MEMBER_INFO
+		   SET PW = #{tempPassword}
+		 WHERE EMAIL = #{email}
+		
+	</update>
+	
+	<update id="updateUserPw" parameterType="Map">
+	
+		UPDATE MEMBER_INFO
+		   SET PW = #{pw}
+		 WHERE ID = #{id}
+		
+	</update>
+	
+	<update id="updateUserInfo" parameterType="Map" >
+	
+		UPDATE MEMBER_INFO
+		   SET AGE = #{age}
+     		 , EMAIL = #{email}
+     		 , PHONE = #{phone}
+     		 , LOCATION = #{location}
+     		 , POSITION = #{position}
+  		 WHERE ID = #{id}
+	
+	</update>
+	
+	<select id="message" parameterType="Map" resultType="Map">
+	
+		SELECT T2.*
+		  FROM(SELECT ROWNUM RNUM, T1.*
+		         FROM(SELECT *
+		                FROM MESSAGE
+                   WHERE RECEIVER = #{id}
+                   <if test ='msgSeqNo != null'>
+                   	 AND MSG_SEQ_NO = #{msgSeqNo}
+                   </if>
+		               ORDER BY MSG_SEQ_NO DESC) T1
+		  <![CDATA[
+		        WHERE ROWNUM <= #{page} * #{pageSize}) T2
+		  WHERE T2.RNUM >= #{page} * #{pageSize} - (#{pageSize} - 1)
+		  ]]>
+	
+	</select>
+	
+	
+	<select id="countMsg" parameterType="Map" resultType="Integer">
+		 SELECT COUNT(*)
+		   FROM MESSAGE
+		  WHERE RECEIVER = #{id}
+	</select>
+	
+	
+	<update id="updateMsgStatus" parameterType="Map" >
+	
+		UPDATE MESSAGE
+	       SET MSG_YN = 'Y'
+	     WHERE MSG_SEQ_NO = #{msgSeqNo}
+	
+	</update>
+	
+	
+	<select id = "myTeamList" parameterType="Map" resultType="Map">
+	
+		SELECT T2.*
+		  FROM(SELECT ROWNUM RNUM, T1.*
+		         FROM(SELECT TEAM_SEQ_NO
+		                   , TEAM_NAME
+		                   , TEAM_MEMBER_NUM
+		                   , TEAM_MEMBER_AGE
+		                   , TEAM_INFO
+		                   , TEAM_LOCATION
+		                   , TEAM_EMBLEM
+		                   , ID
+		                FROM TEAM_CREATE
+                     WHERE TEAM_SEQ_NO IN (SELECT TEAM_SEQ_NO
+                                           FROM MANAGEMENT
+                                          WHERE ID = #{id})
+		               ORDER BY TEAM_SEQ_NO DESC) T1
+		 <![CDATA[
+		        WHERE ROWNUM <= #{page} * #{pageSize}) T2
+		  WHERE T2.RNUM >= #{page} * #{pageSize} - (#{pageSize} - 1)
+		 ]]>
+		 
+	</select>
+	
+	<select id="myTeamCnt" resultType="Integer">
+	
+		SELECT COUNT(*)
+		  FROM TEAM_CREATE
+		 WHERE TEAM_SEQ_NO IN (SELECT TEAM_SEQ_NO
+		                        FROM MANAGEMENT
+		                       WHERE ID = #{id})
+		
+	</select>
+	
+	
+	<delete id="deleteMsg" parameterType="Map">
+	
+		DELETE 
+		  FROM MESSAGE
+		 WHERE MSG_SEQ_NO = #{msgSeqNo}
+	
+	</delete>
+	
+	<delete id="dropOut" parameterType="Map">
+		
+		DELETE
+  		  FROM MANAGEMENT
+ 		 WHERE ID = #{id}
+   	       AND TEAM_SEQ_NO = #{teamSeqNo}
+	
+	
+	</delete>
+	
+	
+	<delete id = "teamDelete" parameterType="Map">
+		
+		DELETE
+		  FROM TEAM_CREATE
+		 WHERE ID = #{id}
+		   AND TEAM_SEQ_NO = #{teamSeqNo}
+		   AND TEAM_SEQ_NO IN (SELECT TEAM_SEQ_NO 
+		                         FROM MANAGEMENT)
+	</delete>
+	
+	<insert id="insertNote" parameterType="Map">
+	
+		INSERT INTO NOTE
+		      (NOTE_SEQ_NO
+		      , CONTENT
+		      , SENDER
+		      , RECEIVER
+		      , NOTE_YN)
+		       VALUES
+		       ((SELECT NVL(MAX(NOTE_SEQ_NO), 0) + 1
+				   FROM NOTE)
+		       , #{content}
+		       , #{sender}
+		       , #{receiver}
+		       ,'N')
+	
+	</insert>
+	
+	<select id="myNote" parameterType="Map" resultType="Map">
+	
+		SELECT T2.*
+		  FROM(SELECT ROWNUM RNUM, T1.*
+		         FROM(SELECT NOTE_SEQ_NO
+		                   , CONTENT
+		                   , SENDER
+		                   , RECEIVER
+		                   , NOTE_YN
+		                FROM NOTE
+                   WHERE RECEIVER = #{id}
+                   <if test ='noteSeqNo != null'>
+                   	 AND NOTE_SEQ_NO = #{noteSeqNo}
+                   </if>
+		               ORDER BY NOTE_SEQ_NO DESC) T1
+		  <![CDATA[
+		        WHERE ROWNUM <= #{notePage} * #{notePageSize}) T2
+		  WHERE T2.RNUM >= #{notePage} * #{notePageSize} - (#{notePageSize} - 1)
+		  ]]>
+	
+	</select>
+	
+	<select id="myNoteCount" parameterType="Map" resultType="Integer">
+	
+		 SELECT COUNT(*)
+		   FROM NOTE
+		  WHERE RECEIVER = #{id}
+		  
+	</select>
+	
+	<update id="updateNoteStatus" parameterType="Map" >
+	
+		UPDATE NOTE
+	       SET NOTE_YN = 'Y'
+	     WHERE NOTE_SEQ_NO = #{noteSeqNo}
+	
+	</update>
+	
+	<delete id="deleteNote" parameterType="Map">
+	
+		DELETE 
+		  FROM NOTE
+		 WHERE NOTE_SEQ_NO = #{noteSeqNo}
+	
+	</delete>
+	
+	<select id="sendNote" parameterType="Map" resultType="Map">
+	
+		SELECT T2.*
+		  FROM(SELECT ROWNUM RNUM, T1.*
+		         FROM(SELECT NOTE_SEQ_NO
+		                   , CONTENT
+		                   , SENDER
+		                   , RECEIVER
+		                   , NOTE_YN
+		                FROM NOTE
+                   WHERE SENDER = #{id}
+                   <if test ='sendSeqNo != null'>
+                   	 AND NOTE_SEQ_NO = #{sendSeqNo}
+                   </if>
+		               ORDER BY NOTE_SEQ_NO DESC) T1
+		  <![CDATA[
+		        WHERE ROWNUM <= #{sendPage} * #{sendPageSize}) T2
+		  WHERE T2.RNUM >= #{sendPage} * #{sendPageSize} - (#{sendPageSize} - 1)
+		  ]]>
+	
+	</select>
+	
+	<select id="sendCount" parameterType="Map" resultType="Integer">
+
+		 SELECT COUNT(*)
+		   FROM NOTE
+		  WHERE SENDER = #{id}
+		  
+	</select>
+	
+	<select id="newNote" parameterType="Map" resultType="Integer">
+	
+		SELECT COUNT(*)
+		  FROM NOTE
+		 WHERE RECEIVER = #{id}
+		   AND NOTE_YN = 'N'
+		  
+	</select>
+	
+	<select id="newMsg" parameterType="Map" resultType="Integer">
+	
+		SELECT COUNT(*)
+		  FROM MESSAGE
+		 WHERE RECEIVER = #{id}
+		   AND MSG_YN = 'N'
+	
+	</select>
+	
+</mapper>
+
+
+
+
+
+
+
+

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ballochilly.res.client.dao.community.VideoBoardReplyDao">
+	
+<!-- 	댓글 등록 -->
+	<insert id="AddCommentVideoBoard" parameterType="Map">
+
+		INSERT INTO BOARD_REPLYS 
+			   ( BR_SEQ_NO, BV_SEQ_NO, P_ID
+			   , LVL, CONTENT, CRE_DATE, ID )
+		VALUES 
+			   (
+				(SELECT NVL(MAX(BR_SEQ_NO), 0) + 1
+				   FROM BOARD_REPLYS )
+			  	, #{bvSeqNo}, #{pId}, #{lvl}
+			  	, #{content}, SYSDATE, #{id}
+			   )
+	</insert>
+
+<!-- 	댓글 테이블 이용후기게시판관련 정보 다 가져오기 -->
+	<select id="selectCommentVideoBoard" parameterType="Map" resultType="Map">
+		SELECT T2.*
+		  FROM (SELECT T1.*
+				  FROM ( SELECT ROWNUM RN, A.*
+						   FROM ( SELECT BR_SEQ_NO, BV_SEQ_NO, P_ID, LVL
+									   , CONTENT, CRE_DATE, ID
+								    FROM BOARD_REPLYS
+								   WHERE 1 = 1
+								 <if test='bvSeqNo != null'>
+								     AND BV_SEQ_NO = #{bvSeqNo}
+								   START WITH P_ID IS NULL
+		                         CONNECT BY PRIOR BR_SEQ_NO = P_ID
+		                           ORDER SIBLINGS BY BR_SEQ_NO ASC
+								 </if>
+								   
+								   ) A ) T1
+		<![CDATA[								   
+			     WHERE ROWNUM <= #{page} * #{pageSize} ) T2
+	     WHERE T2.RN >= #{page} * #{pageSize} - (#{pageSize} -1)
+	    ]]> 
+	</select>
+
+<!-- 댓글 갯수 가져오기 -->
+	<select id="getCountNoVideoComment" parameterType="Map" resultType="Integer">
+		SELECT COUNT(*)
+		  FROM BOARD_REPLYS
+		 WHERE BV_SEQ_NO = #{bvSeqNo}
+	</select>
+
+<!-- 댓글 수정	 -->
+	<update id="editCommentVideoBoard" parameterType="Map" >
+			
+			UPDATE BOARD_REPLYS  
+			   SET CONTENT = #{content}
+		 	 WHERE BR_SEQ_NO = #{brSeqNo}
+	</update>
+
+<!-- 댓글 삭제		 -->
+	<delete id="deleteCommentVideoBoard" parameterType="Map">
+			DELETE FROM BOARD_REPLYS
+			 WHERE BR_SEQ_NO = #{brSeqNo}
+	</delete>
+	
+</mapper>

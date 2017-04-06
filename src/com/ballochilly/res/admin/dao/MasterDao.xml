@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ballochilly.res.admin.dao.MasterDao">
+	
+	<select id = "selectMaster" parameterType="Map" resultType="Map">
+		
+		SELECT *
+		  FROM MASTER_INFO
+		 WHERE 1 = 1
+		 <if test="masterId != null">
+		   AND MASTER_NAME = #{masterId}
+		 </if>
+	</select>
+	
+	
+	<select id = "myReservation" parameterType="Map" resultType="Map">
+	
+		SELECT *
+		  FROM RESERVATION
+		 WHERE SI_SEQ_NO IN (SELECT SI_SEQ_NO
+		                       FROM STADIUM_INFO
+		                      WHERE STADIUM_NAME = #{masterName})
+		  AND YEAR = #{year}
+		  AND MONTH = #{month}
+		  AND DAY = #{day}
+	
+	</select>
+	
+	
+	<select id="cntCourt" parameterType="Map" resultType="Map">
+	
+		SELECT COURT, (SELECT COUNT(*)
+               			 FROM STADIUM_INFO
+                		WHERE STADIUM_NAME = #{masterName}) AS CNT
+		  FROM STADIUM_INFO
+ 		 WHERE STADIUM_NAME = #{masterName}
+	
+	</select>
+	
+	<select id="selectSiNumber" parameterType="Map" resultType="String">
+	
+		SELECT SI_SEQ_NO
+		  FROM STADIUM_INFO
+		 WHERE STADIUM_NAME = #{stadiumName}
+		   AND COURT = #{court}
+	
+	</select>
+	
+	<insert id="masterReservation" parameterType="Map">
+		
+		INSERT INTO RESERVATION
+					(RV_SEQ_NO, YEAR, MONTH, DAY, START_TIME, END_TIME, COURT, ID, SI_SEQ_NO, INFO)
+			VALUES(
+					(SELECT NVL(MAX(RV_SEQ_NO), 0)+1
+					   FROM RESERVATION)
+				  , #{year}
+				  , #{month}
+				  , #{day}
+				  , #{startTime}
+				  , #{endTime}
+				  , #{court}
+				  , #{id}
+				  , #{siSeqNo}
+				  , #{info}
+			)
+	
+	</insert>
+	
+	<delete id="masterDelete" parameterType="Map">
+	
+		DELETE
+		  FROM RESERVATION
+		 WHERE RV_SEQ_NO = #{rvSeqNo}
+	
+	</delete>
+	
+	
+	<select id="selectReservationUserInfo" parameterType="Map" resultType="Map">
+	
+		SELECT *
+		  FROM MEMBER_INFO
+		 WHERE ID = #{userId}
+	
+	</select>
+	
+	
+</mapper>
+
+
+
+
+
+
+
+

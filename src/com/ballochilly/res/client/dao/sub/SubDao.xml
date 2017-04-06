@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ballochilly.res.client.dao.sub.SubDao">
+
+	<select id="allReservaionForName" parameterType="Map" resultType="Map">
+		
+		SELECT RV_SEQ_NO
+	         , TO_NUMBER(YEAR) AS YEAR
+	         , TO_NUMBER(MONTH) AS MONTH
+	         , TO_NUMBER(DAY) AS DAY
+	         , START_TIME
+	         , END_TIME
+	         , COURT
+	         , ID
+	         , TEAM_SEQ_NO
+	         , SI_SEQ_NO
+	         , INFO
+		  FROM RESERVATION
+		 WHERE SI_SEQ_NO IN (SELECT SI_SEQ_NO
+		                       FROM STADIUM_INFO
+		                      WHERE STADIUM_NAME = #{masterName})
+		
+	</select>
+	
+</mapper>
+
+
+
+
+
+
+
+

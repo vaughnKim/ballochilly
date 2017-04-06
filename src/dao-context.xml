@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+                        http://www.springframework.org/schema/beans/spring-beans.xsd
+                        http://www.springframework.org/schema/context
+                        http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- Declare  Reservation DAO Bean-->
+	<bean id="ReservationDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" 
+				  value="com.ballochilly.res.client.dao.reservation.ReservationDao" />
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+		<property name="sqlSessionTemplate" ref="sqlSessionTemplate"/>
+	</bean>
+	
+	<!-- 	Declare StadiumDao Bean -->
+	<bean id="StadiumDao"
+		class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface"
+			value="com.ballochilly.res.client.dao.stadium.StadiumDao"/>
+		<property name="sqlSessionFactory"
+			ref="sqlSessionFactory"/>
+		<property name="sqlSessionTemplate"
+			ref="sqlSessionTemplate"/>
+	</bean>
+	
+<!-- 	Declare StadiumGaleryDao Bean -->
+	<bean id="StadiumGaleryDao"
+		class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface"
+			value="com.ballochilly.res.client.dao.stadium.StadiumGaleryDao"/>
+		<property name="sqlSessionFactory"
+			ref="sqlSessionFactory"/>
+		<property name="sqlSessionTemplate"
+			ref="sqlSessionTemplate"/>
+	</bean>
+	
+<!-- 	Declare StadiumBoardDao Bean -->
+	<bean id="StadiumBoardDao"
+		class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface"
+			value="com.ballochilly.res.client.dao.stadium.StadiumBoardDao"/>
+		<property name="sqlSessionFactory"
+			ref="sqlSessionFactory"/>
+		<property name="sqlSessionTemplate"
+			ref="sqlSessionTemplate"/>
+	</bean>
+	
+<!-- 	Declare StadiumBoardAtchDao Bean -->
+	<bean id="StadiumBoardAtchDao"
+		class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface"
+			value="com.ballochilly.res.client.dao.stadium.StadiumBoardAtchDao"/>
+		<property name="sqlSessionFactory"
+			ref="sqlSessionFactory"/>
+		<property name="sqlSessionTemplate"
+			ref="sqlSessionTemplate"/>
+	</bean>
+	
+<!-- 	Declare StadiumBoardReplyDao Bean -->
+	<bean id="StadiumBoardReplyDao"
+		class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface"
+			value="com.ballochilly.res.client.dao.stadium.StadiumBoardReplyDao"/>
+		<property name="sqlSessionFactory"
+			ref="sqlSessionFactory"/>
+		<property name="sqlSessionTemplate"
+			ref="sqlSessionTemplate"/>
+	</bean>
+	
+<!-- 	Declare VideoBoardDao Bean -->
+	<bean id="VideoBoardDao"
+		class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface"
+			value="com.ballochilly.res.client.dao.community.VideoBoardDao"/>
+		<property name="sqlSessionFactory"
+			ref="sqlSessionFactory"/>
+		<property name="sqlSessionTemplate"
+			ref="sqlSessionTemplate"/>
+	</bean>
+	
+<!-- 	Declare VideoBoardReplyDao Bean -->
+	<bean id="VideoBoardReplyDao"
+		class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface"
+			value="com.ballochilly.res.client.dao.community.VideoBoardReplyDao"/>
+		<property name="sqlSessionFactory"
+			ref="sqlSessionFactory"/>
+		<property name="sqlSessionTemplate"
+			ref="sqlSessionTemplate"/>
+	</bean>
+	
+<!-- 	Declare VideoBoardAtchDao Bean -->
+	<bean id="VideoBoardAtchDao"
+		class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface"
+			value="com.ballochilly.res.client.dao.community.VideoBoardAtchDao"/>
+		<property name="sqlSessionFactory"
+			ref="sqlSessionFactory"/>
+		<property name="sqlSessionTemplate"
+			ref="sqlSessionTemplate"/>
+	</bean>
+
+</beans>
+
+
+
+
+
+

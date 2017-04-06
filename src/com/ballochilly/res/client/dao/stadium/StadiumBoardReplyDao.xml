@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ballochilly.res.client.dao.stadium.StadiumBoardReplyDao">
+	
+<!-- 	댓글 등록 -->
+	<insert id="AddCommentBoard" parameterType="Map">
+
+		INSERT INTO BOARD_REPLYS 
+			   ( BR_SEQ_NO, BSR_SEQ_NO, P_ID
+			   , LVL, CONTENT, CRE_DATE, ID )
+		VALUES 
+			   (
+				(SELECT NVL(MAX(BR_SEQ_NO), 0) + 1
+				   FROM BOARD_REPLYS )
+			  	, #{bsrSeqNo}, #{pId}, #{lvl} 
+			  	, #{content}, SYSDATE, #{id}
+			  	
+			   )
+	</insert>
+
+<!-- 	댓글 테이블 이용후기게시판관련 정보 다 가져오기 -->
+	<select id="selectCommentBoard" parameterType="Map" resultType="Map">
+		SELECT T2.*
+		     , ( SELECT COUNT(*)
+		     	   FROM BOARD_REPLYS ) AS CNT
+		  FROM (SELECT T1.*
+				  FROM ( SELECT ROWNUM RN, A.*
+						   FROM ( SELECT BSR_SEQ_NO, P_ID, LVL
+                          			   , CONTENT, ID, CRE_DATE, BR_SEQ_NO
+									   , CASE WHEN TO_CHAR(SYSDATE, 'YYYYMMDD') = TO_CHAR(CRE_DATE, 'YYYYMMDD')
+									   		  THEN 'Y' ELSE 'N' END AS NOW_DATE
+								    FROM BOARD_REPLYS
+								   WHERE 1 = 1
+								 <if test='bsrSeqNo != null'>
+								     AND BSR_SEQ_NO = #{bsrSeqNo}
+		                           START WITH P_ID IS NULL
+		                         CONNECT BY PRIOR BR_SEQ_NO = P_ID
+		                           ORDER SIBLINGS BY BR_SEQ_NO ASC
+								 </if>
+                          			  	  ) A   ) T1
+									  	  
+		<![CDATA[								   
+			     WHERE ROWNUM <= #{page} * #{pageSize} ) T2
+	     WHERE T2.RN >= #{page} * #{pageSize} - (#{pageSize} -1)
+	    ]]> 
+	</select>
+
+<!-- 댓글 갯수 가져오기 -->
+	<select id="getCountCommentNo" parameterType="Map" resultType="Integer">
+		SELECT COUNT(*)
+		  FROM BOARD_REPLYS
+		 WHERE BSR_SEQ_NO = #{bsrSeqNo}
+	</select>
+
+<!-- 댓글 수정	 -->
+	<update id="editCommentBoard" parameterType="Map" >
+			
+			UPDATE BOARD_REPLYS  
+			   SET CONTENT = #{content}
+		 	 WHERE BR_SEQ_NO = #{brSeqNo}
+	</update>
+
+<!-- 댓글 삭제		 -->
+	<delete id="deleteCommentBoard" parameterType="Map">
+			DELETE FROM BOARD_REPLYS
+			 WHERE BR_SEQ_NO = #{brSeqNo}
+	</delete>
+	
+</mapper>
+
+
+
+
+
+
+
+

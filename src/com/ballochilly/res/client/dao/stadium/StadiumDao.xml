@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ballochilly.res.client.dao.stadium.StadiumDao">
+	
+	<select id="getLastBoardSeqNo" parameterType="Map" resultType="Integer">
+		SELECT MAX(SI_SEQ_NO)
+		  FROM STADIUM_INFO
+	</select>
+	
+	<insert id="AddStadium" parameterType="Map">
+		INSERT INTO STADIUM_INFO( 
+					SI_SEQ_NO, STADIUM_NAME, COURT, ADDRESS, DISTRICT 
+				  , STADIUM_TITLE, MAP, FARE, LAT, LNG, INFO 
+			 		)
+			   VALUES ( 
+			   		(SELECT NVL(MAX(SI_SEQ_NO), 0) + 1
+		       		   FROM STADIUM_INFO) 
+			   	  ,	#{stadiumName}, #{court}, #{address}, #{district}
+			   	  , #{file1}, #{file2}, #{file3}, #{lat}, #{lng}, #{info} 
+<!-- 			   		#{stadiumName, jdbcType=VARCHAR} -->
+<!-- 			   		, #{address, jdbcType=VARCHAR} -->
+<!-- 			   		, #{district, jdbcType=VARCHAR} -->
+<!-- 					, #{coordinate, jdbcType=VARCHAR} -->
+<!-- 					, #{court, jdbcType=VARCHAR} -->
+<!-- 					, #{fare, jdbcType=VARCHAR} -->
+<!-- 					, #{info, jdbcType=VARCHAR}  -->
+					)
+	</insert>
+	
+	<select id="selectAllStadium" parameterType="Map" resultType="Map">
+		SELECT STADIUM_NAME
+     		 , ADDRESS
+     		 , DISTRICT
+     		 , STADIUM_TITLE
+     		 , INFO
+		  FROM STADIUM_INFO 
+		 GROUP BY STADIUM_NAME, ADDRESS, DISTRICT, STADIUM_TITLE, INFO
+<!-- 		WHERE STADIUM_NAME LIKE '%A' -->
+		 <if test='district != null'>
+	   HAVING DISTRICT = #{district}
+<!-- 		 	WHERE A.DISTRICT LIKE '%'||#{district}||'%' -->
+<!-- 		 	WHERE DISTRICT LIKE '%'||#{district}||'%' -->
+		 </if>  
+	    ORDER BY STADIUM_NAME ASC
+	</select>
+	
+	<select id="selectEachStadium" parameterType="Map" resultType="Map">
+		
+		SELECT SI_SEQ_NO, STADIUM_NAME, COURT, ADDRESS, DISTRICT 
+			 , STADIUM_TITLE, MAP, FARE, LAT, LNG, INFO
+		  FROM STADIUM_INFO
+		 GROUP BY SI_SEQ_NO, STADIUM_NAME, COURT, ADDRESS, DISTRICT 
+			 , STADIUM_TITLE, MAP, FARE, LAT, LNG, INFO 
+		<if test='stadiumName != null'>
+		HAVING STADIUM_NAME = #{stadiumName}
+		</if> 
+		 ORDER BY COURT ASC   
+	</select>
+	
+	<select id="selectTitlePhoto" parameterType="Map" resultType="Map">
+		
+		SELECT STADIUM_TITLE
+  		  FROM STADIUM_INFO
+  		 GROUP STADIUM_TITLE 
+ 		HAVING STADIUM_NAME = #{stadiumName}
+ 	</select>
+	
+	<select id="getTotalStadiumNo" parameterType="Map" resultType="Integer">
+		SELECT COUNT(*)
+ 		  FROM (SELECT STADIUM_NAME
+         		  FROM STADIUM_INFO
+		         GROUP BY STADIUM_NAME )
+ 	</select>
+ 	
+	<select id="getEachCourtNo" parameterType="Map" resultType="Integer">
+		SELECT COUNT(*)
+  		  FROM STADIUM_INFO
+  		 <if test='stadiumName != null'>
+ 		 WHERE STADIUM_NAME = #{stadiumName}
+ 		 </if>
+ 	</select>
+ 	
+ 	<update id="editEachStadiumInfo" parameterType="Map">
+ 		UPDATE STADIUM_INFO
+ 		   SET STADIUM_NAME = #{stadiumName}
+ 		     , COURT = #{court}
+ 		     , ADDRESS = #{address}
+ 		     , DISTRICT = #{district}
+			 , STADIUM_TITLE = #{file1}
+			 , MAP = #{file2}
+			 , FARE = #{file3}
+			 , LAT = #{lat}
+			 , LNG = #{lng}
+			 , INFO = #{info}
+		 WHERE SI_SEQ_NO = #{siSeqNo}	 
+ 	</update>
+ 	
+ 	<delete id="deleteEachStadiumInfo" parameterType="Map">
+ 		DELETE FROM STADIUM_INFO
+ 		 WHERE SI_SEQ_NO = #{siSeqNo}
+ 	</delete>
+</mapper>
+
+
+
+
+
+
+
+

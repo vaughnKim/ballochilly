@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ballochilly.res.client.dao.community.VideoBoardDao">
+
+	<select id="getAllVideoBoardSeqNo" parameterType="Map" resultType="Integer">
+			SELECT BV_SEQ_NO
+			  FROM BOARD_VIDEO
+	</select>
+
+	<select id="getLastVideoBoardSeqNo" parameterType="Map" resultType="Integer">
+			SELECT MAX(BV_SEQ_NO)
+			  FROM BOARD_VIDEO
+	</select>
+
+	<select id="getTotalCountVideoBoard" parameterType="Map" resultType="Integer">
+		SELECT COUNT(*)
+		  FROM BOARD_VIDEO
+		 WHERE 1 = 1
+		 <if test="bvSeqNo != null">
+		   AND BV_SEQ_NO = #{bvSeqNo} 
+		 </if>
+		 <if test="searchType == 1">
+		   AND TITLE LIKE '%' ||#{searchText}||'%'
+		 </if>
+		 <if test="searchType == 2">
+		   AND ID LIKE '%' ||#{searchText}||'%'
+		 </if>
+		 <if test="searchType == 3">
+		   AND CONTENT LIKE '%' ||#{searchText}||'%'
+		 </if>
+		 <if test="searchType == 4">
+		   AND CRE_DATE LIKE '%' ||#{searchText}||'%'
+		 </if>
+	</select>
+
+	<insert id="AddVideoBoard" parameterType="Map">
+		INSERT INTO BOARD_VIDEO 
+			   ( BV_SEQ_NO, P_ID, LVL, TITLE
+			   , CONTENT, CRE_DATE, HIT, ID )
+		VALUES 
+			   (
+				( SELECT NVL(MAX(BV_SEQ_NO), 0) + 1
+				    FROM BOARD_VIDEO )
+			  	, #{pId}, #{lvl}, #{title}, #{content}, SYSDATE
+			  	, 0
+			  	, #{id}
+			   )
+	</insert>
+	
+	<select id="selectAllVideoBoard" parameterType="Map" resultType="Map">
+		<![CDATA[
+		SELECT T2.*
+			 , ( SELECT COUNT(*) 
+			       FROM BOARD_REPLYS BR 
+			      WHERE T2.BV_SEQ_NO = BR.BV_SEQ_NO ) AS CNT
+		  FROM (SELECT T1.*
+		          FROM	(SELECT ROWNUM RNUM, A.*
+			          	   FROM (SELECT A.BV_SEQ_NO, A.P_ID, A.LVL, A.TITLE
+		                  		      , A.CONTENT, A.ID, A.CRE_DATE, A.HIT
+		                  		      , CASE WHEN TO_CHAR(SYSDATE, 'YYYYMMDD') = TO_CHAR(A.CRE_DATE, 'YYYYMMDD')
+                                  			 THEN 'Y' ELSE 'N' END AS NOW_DATE
+		                  		   FROM BOARD_VIDEO A
+		                  		  WHERE 1 = 1
+			]]>
+		                  		 <if test="bvSeqNo != null">
+		                 		    AND A.BV_SEQ_NO = #{bvSeqNo} 
+		                 		 </if>
+		                 		 <if test="searchType == 1">
+		                 		 	AND A.TITLE LIKE '%' ||#{searchText}||'%'
+		                 		 </if>
+		                 		 <if test="searchType == 2">
+		                 		 	AND A.ID LIKE '%' ||#{searchText}||'%'
+		                 		 </if>
+		                 		 <if test="searchType == 3">
+		                 		 	AND A.CONTENT LIKE '%' ||#{searchText}||'%'
+		                 		 </if>
+		                 		 <if test="searchType == 4">
+		                 		 	AND A.CRE_DATE LIKE '%' ||#{searchText}||'%'
+		                 		 </if>
+		                 		  GROUP BY A.BV_SEQ_NO, A.P_ID 
+		                 		  		 , A.LVL, A.TITLE, A.CONTENT 
+		                 		  		 , A.ID, A.CRE_DATE, A.HIT ) A
+		<![CDATA[
+                 	     START WITH A.P_ID IS NULL
+                 	   CONNECT BY PRIOR A.BV_SEQ_NO = A.P_ID
+                         ORDER SIBLINGS BY A.BV_SEQ_NO DESC ) T1
+         		 WHERE ROWNUM <= #{page} * #{pageSize} ) T2
+		 WHERE T2.RNUM >= #{page} * #{pageSize} - (#{pageSize} - 1)
+		]]>
+	</select>
+	
+	<select id="selectEachVideoBoard" parameterType="Map" resultType="Map">
+		SELECT A.BV_SEQ_NO, A.P_ID, A.LVL, A.TITLE
+			 , A.CONTENT, A.ID, A.CRE_DATE, A.HIT
+			 , B.BV_ATCH_VNAME
+		  FROM BOARD_VIDEO A
+		  FULL OUTER JOIN BOARD_ATCH B
+		    ON A.BV_SEQ_NO = B.BV_SEQ_NO
+		 WHERE A.BV_SEQ_NO = #{bvSeqNo}
+	</select>		  
+	
+	<update id="raiseVideoBoardHit" parameterType="Map">
+			UPDATE BOARD_VIDEO 
+			   SET HIT = HIT+1
+		     WHERE BV_SEQ_NO = #{bvSeqNo}
+	</update>
+
+	<update id="editVideoBoard" parameterType="Map" >
+			UPDATE BOARD_VIDEO  
+			   SET TITLE = #{title}
+		 	   	 , CONTENT = #{content}
+		 	 WHERE BV_SEQ_NO = #{bvSeqNo}
+	</update>
+	
+	<delete id="deleteVideoBoard" parameterType="Map">
+			DELETE FROM BOARD_VIDEO
+			 WHERE BV_SEQ_NO = #{bvSeqNo}
+	</delete>
+	
+</mapper>
+
+
+
+
+
+
+
+
